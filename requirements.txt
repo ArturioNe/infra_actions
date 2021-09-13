@@ -1,4 +1,3 @@
 Django
 pytz
 sqlparse
-# requests==2.22.0
