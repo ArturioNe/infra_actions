@@ -17,15 +17,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
-        # установка зависимостей
         pip install -r requirements.txt
 
     - name: Test with flake8 and django tests
       run: |
         python -m flake8
-        # перейти в папку, содержащую manage.py - <корневая_папка>/<папка_проекта>/manage.py
         cd infra_project/
-        # запустить написанные разработчиком тесты
         python manage.py test
 
   build_and_push_to_docker_hub:
@@ -34,16 +31,16 @@ jobs:
       needs: tests
       steps:
         - name: Check out the repo
-          uses: actions/checkout@v2 # Проверяет доступность репозитория DockerHub для workflow
+          uses: actions/checkout@v2
         - name: Set up Docker Buildx
-          uses: docker/setup-buildx-action@v1 # Вызывает сборщик контейнеров docker
+          uses: docker/setup-buildx-action@v1
         - name: Login to Docker
-          uses: docker/login-action@v1 # Запуск скрипта авторизации на DockerHub
+          uses: docker/login-action@v1
           with:
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
         - name: Push to Docker Hub
-          uses: docker/build-push-action@v2 # Выполняет push образа в DockerHub
+          uses: docker/build-push-action@v2
           with:
             push: true
             tags: arturnegovora/infra_actions:v1
@@ -58,10 +55,8 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }} # Если ваш ssh-ключ защищён фразой-паролем
+          passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            # Выполняет pull образа с DockerHub
             sudo docker pull arturnegovora/infra_actions:v1
-            #остановка всех контейнеров
             sudo docker stop $(sudo docker ps -a -q)
             sudo docker run --rm -d -p 5000:5000 arturnegovora/infra_actions:v1
